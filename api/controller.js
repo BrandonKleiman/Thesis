@@ -3,6 +3,7 @@ const db = require('./schema');
 var fs = require('fs');
 var json2csv = require('json2csv');
 const AWS = require('aws-sdk');
+var ml = require('machine_learning');
 
 const s3 = new AWS.S3({
   accessKeyId: process.env.S3_ACCESS_KEY,
@@ -339,7 +340,14 @@ exports.getBestThree = function (req, res) {
 };
 
 exports.createMachineGoal = function (req, res) {
-
+  db.Users.findOne({
+    where: { 
+      id: req.body.UserId 
+    }
+  })
+  .then((result) => {
+    console.log(result.lastMachineGoal)
+    if ((Date.now() - result.lastMachineGoal) / (1000 * 60 * 60 * 24) > 7 || result.lastMachineGoal === null) {
       db.RunHistories.findAll({where: { UserId : req.body.UserId }})
         .then((result) => {
           if (result.length > 4) {
@@ -364,41 +372,64 @@ exports.createMachineGoal = function (req, res) {
               tmp.changeAltitude = result[i].changeAltitude;
               formatted.push(tmp);
             }
-
-            
-            // var csvdata = json2csv({ data: formatted, fields: ['distance', 'duration', 'dayOfWeek', 'timeOfDay', 'absAltitude', 'changeAltitude'] });
-            // s3.upload({
-            //   Bucket: 'csvbucketforml',
-            //   accessKeyId: process.env.S3_ACCESS_KEY,
-            //   secretAccessKey: process.env.S3_SECRET,
-            //   subregion: 'us-west-2',
-            //   Key: 'testCSV.csv',
-            //   Body: csvdata,
-            //   ACL: 'public-read-write',  
-            // }, (err, data) => {
-              // if (err) {
-              //   console.log(err);
-              // } 
-              // console.log("succcess: ", data);
-
-              // var params = {
-              //   ClientContext: "prod", 
-              //   FunctionName: "new", 
-              //   InvocationType: "Event"
-              // }; 
-              // lambda.invoke(params, function(err, data) {
-              //   if (err) console.log(err, err.stack); // an error occurred
-              //   else {
-              //     console.log(data);
-              //     db.Users.update({
-              //       lastMachineGoal: Date.now()},
-              //       { where: {
-              //         id: req.body.UserId
-              //       }
-              //     })
-              //   }     
-              // });
+            // var x = []
+            // var y = []
+            // for (var i=0; i<formatted.length; i++) {
+            //   var tmp = [formatted[i].absAltitude, formatted[i].changeAltitude, formatted[i].distance]
+            //   var rate = formatted[i].distance / (formatted[i].duration)
+            //   x.push([rate, formatted[i].distance]);
+            //   y.push(formatted[i].timeOfDay)
+            // }
+            // var dt = new ml.DecisionTree({
+            //     data: x,
+            //     result: y
             // });
+            // dt.build();
+            // dt.print();
+            // var tree = dt.getTree();
+            // while (tree.results === undefined) {
+            //   tree = tree.tb
+            // }
+            // res.send(Object.keys(tree.results))
+
+            var csvdata = json2csv({ data: formatted, fields: ['distance', 'duration', 'dayOfWeek', 'timeOfDay', 'absAltitude', 'changeAltitude'] });
+            s3.upload({
+              Bucket: 'csvbucketforml',
+              accessKeyId: process.env.S3_ACCESS_KEY,
+              secretAccessKey: process.env.S3_SECRET,
+              subregion: 'us-west-2',
+              Key: 'testCSV.csv',
+              Body: csvdata,
+              ACL: 'public-read-write',  
+            }, (err, data) => {
+              if (err) {
+                console.log(err);
+              } 
+              var params = {
+                FunctionName: "createRabbitGoal", 
+                InvocationType: "RequestResponse"
+              }; 
+              lambda.invoke(params, function(err, data) {
+                if (err) console.log(err, err.stack); // an error occurred
+                else {
+                  // console.log(data);
+                  // res.send(JSON.parse(data.Payload)); //skb
+                  db.Users.update({
+                    lastMachineGoal: Date.now(),
+                    machineGoal: data.Payload },
+                    { where: {
+                      id: req.body.UserId
+                    }
+                  })
+                  .then((goal) => {
+                    res.send(JSON.stringify(data.Payload))
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                  })
+                }     
+              });
+            });
           } else {
             res.send("Under 7 days");
           }
@@ -406,4 +437,8 @@ exports.createMachineGoal = function (req, res) {
         .catch((err) => {
           console.log(err);
         });
+    } else {
+      res.send("Under 7 days");
+    }
+  })
 };

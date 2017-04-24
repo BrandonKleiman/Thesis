@@ -61,16 +61,6 @@
   opacity: .75;
 }
 
-#blueSquare {
-  width: 100px;
-  height: 100px;
-  background-color: #3fafff;
-  z-index: 3;
-  background-position: 97% top;
-  opacity: .75;
-  position: absolute;
-}
-
 .topLogin {
   position: absolute;
   z-index: 30;
@@ -80,11 +70,12 @@
 
 #rabbit {
   margin-left: 32vw;
+  margin-top: 25px;
 }
 
 #welcome {
   margin-left: 29vw;
-  margin-top: 100px;
+  margin-top: 90px;
   text-shadow: 2px 2px rgba(100,100,100,.5); 
 }
 
@@ -158,7 +149,7 @@ h3 {
 }
 
 .statsDescr.first {
-  margin-top: 100px;
+  margin-top: 115px;
 }
 
 .bottomLogin {
@@ -210,7 +201,7 @@ h3 {
 
 .bgr1 {
   opacity: .75;
-  height: 154px;
+  height: 148px;
   position: relative;
   z-index: 20;
   width: 100vw;
@@ -233,6 +224,26 @@ h3 {
   float: right;
   margin-top: 100px;
   max-height: 550px;
+}
+
+#profDemo {
+  margin-left: 5vw;
+  margin-top: 80px;
+  max-height: 450px; 
+  float: left; 
+  border-radius: 12px;
+  border: solid #212121 5px;
+
+}
+
+#statsDemo {
+  margin-right: 3vw; 
+  margin-top: 82px; 
+  max-height: 400px;
+  float: right;
+  border-radius: 12px;
+  border: solid #212121 5px;
+
 }
 
 #profilePic {
@@ -272,11 +283,25 @@ h3 {
   width: 100vw;
   height: 400vw;
   position: fixed;
-  background-repeat: no-repeat;
   z-index: -10;
-  background-position: center center;
   margin-top: -120px;
   opacity: .75;
+}
+
+.tealBG {
+  background: linear-gradient(to right, #29beac, #86cead, #29beac);
+}
+
+.blueBG {
+  background: linear-gradient(to right, #238ce3, #22aecc, #238ce3);
+}
+
+.salmonBG {
+  background: linear-gradient(to right, #ff8c69, #ffb769, #ff8c69);
+}
+
+.yellowBG {
+  background: linear-gradient(to right, #ffb263, #ffdd87, #ffb263);
 }
 
 .pageCont {

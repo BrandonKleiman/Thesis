@@ -32,14 +32,14 @@ class LineChart extends React.Component {
     }
     
     converter (d) {
-        d = Number(d);
-        var h = Math.floor(d / 3600);
-        var m = Math.floor(d % 3600 / 60);
-        var s = Math.floor(d % 3600 % 60);
-
-        var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-        var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes") : "";
-        return hDisplay + mDisplay + sDisplay; 
+      d = Number(d);
+      var h = Math.floor(d / 3600);
+      var m = Math.floor(d % 3600 / 60);
+      var s = Math.floor(d % 3600 % 60);
+      s < 10 ? s = '0'+s : null
+      m < 10 && h > 0 ? m = '0'+m : null;
+      var hDisplay = h > 0 ? h + ':' : "";
+      return hDisplay + m + ':' + s; 
     }
 
     getData(input) {
@@ -140,22 +140,24 @@ class LineChart extends React.Component {
             .then((res) => {
                 console.log('Generated goal: ', input)
             })
-            .catch(err => console.log(err))
+            .catch(err => console.log('Unable to generate goal'))
         }
     }
 
     render() {
         return (
-              <Card color="teal">
-                <Card.Content header='Predicts the time it will take you to run a number of miles based on your history' />
+              <Card color="teal" style={{marginLeft: 32, marginRight: -10, width: '46%', fontFamily: 'avenir'}}>
+                <Card.Content header='Time Per Mile Trend' />
+                <Card.Content>
                 { this.props.userdata.loading === true ? (<Segment>
                     <Dimmer active inverted>
                         <Loader size='small'>Loading</Loader>
                     </Dimmer><br /><br /><br /><br />
                     </Segment>) :  (
-                        <div>
+                  <div>
                  <Line data={this.getData([])} />
                 </div>)}
+                    </Card.Content>
                 </Card>
         );
     }

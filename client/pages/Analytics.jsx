@@ -6,7 +6,7 @@ import LineChart from '../components/LineChart';
 import BubbleChart from '../components/BubbleChart';
 import WeeklyChart from '../components/WeeklyChart';
 import { Chart } from 'chart.js'
-import { Card, Grid, Message, Feed } from 'semantic-ui-react';
+import { Button, Card, Grid, Message, Feed, Segment, Dimmer, Loader } from 'semantic-ui-react';
 import axios from 'axios';
 import moment from 'moment';
 
@@ -23,7 +23,7 @@ class Analytics extends React.Component {
         super()
         this.state = {
             value: '',
-            showTimeError: false,
+            error: '',
         }
     
         this.handleChange = this.handleChange.bind(this);
@@ -32,24 +32,31 @@ class Analytics extends React.Component {
 
     handleChange(event) {
         this.setState({value: event.target.value});
+        this.setState({error: ''});
     }
 
     handleSubmit(value) {
-        this.setGoal(this.state.value);
-        //success
+      var miles = parseInt(this.state.value);
+      if (this.props.userdata.history.length > 0 && miles) {
+        this.setGoal(miles);
+      } else if (this.props.userdata.history.length <= 0) {
+         this.setState({error: "You must complete at least one run to get a customized goal."});
+      } else if (!miles) {
+         this.setState({error: "Unable to process request. Please enter a whole number."});
+      }
     }
 
-  componentWillMount() { 
-    if (!!localStorage.getItem("profile")) {
-      this.props.dispatch(UserActions.signIn());
-    }
-  } 
-      setGoal(miles) {
-        //miles is the problem
+    componentWillMount() { 
+      if (!!localStorage.getItem("profile")) {
+          if (!this.props.userdata.DBID) {
+              this.props.dispatch(UserActions.signIn());
+          }
+      }
+    } 
+
+    setGoal(miles) {
         var input = [[miles, null]];
-
         var hist = this.props.userdata.history;
-
         for (var k = 0; k < hist.length; k++) {
             var tuple = [];
             var minutes = this.props.userdata.history[k].duration / 60;
@@ -57,33 +64,25 @@ class Analytics extends React.Component {
             tuple.push(minutes);
             input.push(tuple);
         }
-
         var result = regression('linear', input);
-
         var expectedTime = Math.ceil(result.points[0][1]);
-
-        // var easy = expectedTime;
-        // var medium = expectedTime * 0.85;
-        // var hard = expectedTime * 0.60;
-
-        var converter = function secondsToHms(d) {
-            d = Number(d);
-            var h = Math.floor(d / 3600);
-            var m = Math.floor(d % 3600 / 60);
-            var s = Math.floor(d % 3600 % 60);
-
-            var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-            var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-            var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
-            return hDisplay + mDisplay + sDisplay; 
-        }
-        var duration = converter(expectedTime*60)
-
-
-        var goalInput = "Run " + miles + " miles in " + duration;
-
+        var duration = this.converter(expectedTime*60);
+        let mi;
+        miles == 1 ? mi = ' mile' : mi = ' miles';
+        var goalInput = 'Run ' + miles + mi + ' in ' + duration;
         this.addGoal(this.props.userdata.DBID, goalInput);
     }
+
+    converter (d) {
+          d = Number(d);
+          var h = Math.floor(d / 3600);
+          var m = Math.floor(d % 3600 / 60);
+          var s = Math.floor(d % 3600 % 60);
+          s < 10 ? s = '0'+s : null
+          m < 10 && h > 0 ? m = '0'+m : null;
+          var hDisplay = h > 0 ? h + ':' : "";
+          return hDisplay + m + ':' + s; 
+        }
 
     addGoal(user, input) {
         var that = this;
@@ -94,7 +93,7 @@ class Analytics extends React.Component {
                 status: 'generated'
             })
             .then((res) => {
-                console.log('Generated goal: ', input)
+                this.setState({value: ''});
             })
             .catch(err => console.log(err))
         }
@@ -114,24 +113,14 @@ class Analytics extends React.Component {
                 break;
             }
         }
-        var converter = function secondsToHms(d) {
-            d = Number(d);
-            var h = Math.floor(d / 3600);
-            var m = Math.floor(d % 3600 / 60);
-            var s = Math.floor(d % 3600 % 60);
 
-            var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-            var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-            var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
-            return hDisplay + mDisplay + sDisplay; 
-        }
         time = time / count
         dist = dist / count
         var avg = time / dist
-        avg = converter(avg);
+        avg = this.converter(avg);
             return ("Recently you've averaged " + avg + " per mile.")
         } else {
-            return ("Can't find average data.")
+            return ("Can't find average mile data.")
         }
     }
 
@@ -158,54 +147,33 @@ class Analytics extends React.Component {
         if (this.props.userdata.history.length > 0) {
             var idx = this.props.userdata.history.length - 1;
             var miles = Math.round(this.props.userdata.history[idx].distance * 10) / 10;
-            var converter = function secondsToHms(d) {
-                d = Number(d);
-                var h = Math.floor(d / 3600);
-                var m = Math.floor(d % 3600 / 60);
-                var s = Math.floor(d % 3600 % 60);
-
-                var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-                var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-                var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
-                return hDisplay + mDisplay + sDisplay; 
-            }
-            var duration = converter(this.props.userdata.history[idx].duration);
+            var duration = this.converter(this.props.userdata.history[idx].duration);
             var date = this.getDate();
             return ("You ran " + miles + " miles in " + duration + " about " + date + ".");
         } else {
             return ("Can't find recent run data.");
         }
     }
-    machineGoal() {
-        axios.post('/api/machineGoal', {
-            UserId: this.props.userdata.DBID,
-            customInput: "TBD",
-        })
-        .then((res) => {
-            if (res.data === 'Under 7 days') {
-                this.setState({
-                    showTimeError: true
-                })
-                setTimeout(() => {
-                    this.setState({
-                        showTimeError: false
-                    })
-                }, 10000);
-            }
-        })
-        .catch(err => console.log(err))
-    }
-
 
     render() {
+      if (!!localStorage.getItem("profile") === false){
+        window.location.href= "/#/login"
+        return false;
+      } else {
         return (
             <div className="pageCont">
             <img className="yellowCircle" src="assets/circle.png"/>
-            <img className="pageBG" src="assets/salmon.png"/>
-              <Card.Group itemsPerRow={2}>
-                <Card color="teal">
+            <div className="pageBG salmonBG" ></div>
+              <Card.Group itemsPerRow={2} >
+                <Card color="teal" style={{marginLeft: 32, marginRight: -10, width: '46%'}}>
                 <Card.Content header='Goal Planner' />
                 <Card.Content>
+
+                {this.props.userdata.loading === true ? (<Segment>
+                  <Dimmer active inverted>
+                  <Loader size="small">Loading</Loader>
+                  </Dimmer><br /><br /><br /><br />
+                </Segment>) : ( <div>
                     <Feed>
                     <Feed.Event>
                     <Feed.Content>
@@ -215,16 +183,16 @@ class Analytics extends React.Component {
                         </Feed.Summary>
                     </Feed.Content>
                     </Feed.Event>
-                            <br />
+                    <br />
                     <Feed.Event>
                     <Feed.Content>
                         <Feed.Date />
                         <Feed.Summary>
-                        {this.getWeekAverage()}
+                            {this.getWeekAverage()}
                         </Feed.Summary>
                     </Feed.Content>
                     </Feed.Event>
-                        <br />
+                    <br />
                     <Feed.Event>
                     <Feed.Content>
                         <Feed.Date />
@@ -236,26 +204,18 @@ class Analytics extends React.Component {
                     </Feed.Event>
                     </Feed>
                     <br />
-                <form onSubmit={this.handleSubmit}>
-                    <label>
-                        Set a goal (miles): <br />
-                        <input type="number" name="mileGoal" value={this.state.value} onChange={this.handleChange}/>
-                    </label>
-                    <input type="submit" value="Submit" />
-                </form>
+                    <div>Get a customized goal! </div>
+                    <div className="ui small icon input"> 
+                      <input type="text" placeholder="Enter miles to run" value={this.state.value} onChange={this.handleChange}/>
+                      <div className="ui small button teal" 
+                      onClick={() => {this.handleSubmit(this.state.value)}}>Submit</div>
+                    </div>
                 <br />
                 <br />
-                <button onClick={() => this.machineGoal()}> Don't Click </button>
-                <br /><br />
-                  { this.state.showTimeError ? (<Message
-                    error
-                    header='Unable to process request'
-                    list={[
-                    'You must have at least 5 saved runs to generate a customized goal.',
-                    'Limit: 1 customized goal per week.',
-                    ]}
-                />) : null }
-                <br />
+                <div style={{color: 'red', fontSize: 12}}>{this.state.error}</div>
+                </div>
+                )}
+
                 </Card.Content>
                 </Card>
                 <BubbleChart />
@@ -264,6 +224,7 @@ class Analytics extends React.Component {
                 </Card.Group>
             </div>
         )
+      }
     }
 }
 

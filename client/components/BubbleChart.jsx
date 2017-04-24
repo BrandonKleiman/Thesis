@@ -19,25 +19,21 @@ class BubbleChart extends React.Component {
 
         for (var i = 0; i < this.props.userdata.history.length; i++) {
 
-            var triple = {};
+            var triple = {}
 
             //this.props.userdata.history[i].distance / this.props.userdata.history[i].duration
 
             triple.x = i;
-            triple.y = this.props.userdata.history[i].duration / 60;
-            triple.r = Math.ceil(this.props.userdata.history[i].distance * 5);
+            triple.y = (this.props.userdata.history[i].duration / 60).toFixed(2);
+            triple.r = Math.ceil(this.props.userdata.history[i].distance);
 
             datesArray.push(this.props.userdata.history[i].date)
             resultsArray.push(triple);
         }
-        
-
-        console.log(datesArray[9] - datesArray[0]);
         return {
-            xLabels: datesArray,
             datasets: [
                 {
-                    label: 'Date / Minutes / Distance',
+                    label: 'Run # / Minutes / Miles',
                     fill: false,
                     lineTension: 0.1,
                     backgroundColor: 'rgba(75,192,192,0.4)',
@@ -63,8 +59,8 @@ class BubbleChart extends React.Component {
 
     render() {
         return (
-            <Card color="teal">
-                <Card.Content header='Tracks your past runs by date and predicts future progress' />
+            <Card color="teal" style={{marginLeft: 32, width: '46%', fontFamily: 'avenir'}}>
+                <Card.Content header='Summary of Previous Runs' />
                 <Card.Content>
                  { this.props.userdata.loading === true ? (<Segment>
                     <Dimmer active inverted>

@@ -1,12 +1,21 @@
 import Auth0Lock from 'auth0-lock';
 import config from '../../environment';
 import { connect } from 'react-redux';
+import rabbitLogo from '../../output/assets/rabbitlogo.png';
 
 
 class AuthService {
   constructor(clientId, domain) {
     // Configure Auth0
-    this.lock = new Auth0Lock(config.AUTH_ID, config.AUTH_CLIENT)
+    this.lock = new Auth0Lock(config.AUTH_ID, config.AUTH_CLIENT, {
+      theme: {
+        logo: rabbitLogo,
+        primaryColor: '#727070',
+      },
+      languageDictionary: {
+        title: 'Rabbit Fitness',
+      },
+    });
 
     // Add callback for lock `authenticated` event
     var self = this;
@@ -20,7 +29,6 @@ class AuthService {
         localStorage.setItem('accessToken', authResult.accessToken);
         localStorage.setItem('profile', JSON.stringify(profile));
         window.location.href = '/#/profile/';
-
       });
     });
 

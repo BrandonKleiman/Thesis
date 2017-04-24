@@ -5,7 +5,6 @@ import axios from 'axios';
 import * as UserActions from '../actions';
 import _ from 'lodash'
 
-
 @connect((store) => {
   return {
     userdata: store.userdata,
@@ -30,12 +29,20 @@ export default class PacksCard extends React.Component {
       challengee: '',
       challengeModalOpen: false,
       challengeeName: '',
-      packs: '',
+      packs: null,
       packIndex: ''
     }
 
   componentWillReceiveProps(props) {
-    this.setState({packs: props.userdata.myPacks})
+    setTimeout(() => {
+      this.setState({packs: props.userdata.myPacks})
+    }, 0);
+  }
+  componentWillMount() {
+    
+    if (!!this.props.userdata.DBID) {
+      this.setState({packs: this.props.userdata.myPacks})
+    }
   }
 
   handleOpen = (e) => this.setState({
@@ -185,7 +192,7 @@ export default class PacksCard extends React.Component {
       .then((res) => {
         that.setState({challengeText: ''});
       })
-      .catch(err => console.log(err))
+      .catch(err => console.log('Unable to process request'))
     }
   }
 
@@ -210,7 +217,7 @@ export default class PacksCard extends React.Component {
                             <input className="modalInput" onChange={(e) => this.handleChange(e)} />
                             
                         <Modal.Actions>
-                        <Button type='reset' color='pink' onClick={this.handleClose} >
+                        <Button type='reset' onClick={this.handleClose} >
                             <Icon name='remove' /> Cancel
                         </Button>
                         <Button type='submit' color='teal'>
@@ -245,7 +252,7 @@ export default class PacksCard extends React.Component {
                         <br />
                         <br />
                 <Modal.Actions>
-                <Button type='reset' color='pink' onClick={this.handleInviteClose} >
+                <Button type='reset' onClick={this.handleInviteClose} >
                     <Icon name='remove' /> Cancel
                 </Button>
                 <Button type='submit' color='teal'>
@@ -255,11 +262,12 @@ export default class PacksCard extends React.Component {
                 </form>
                 </Modal.Content>
             </Modal>
-        { this.props.userdata.loading === true ? (<Segment>
+        { !this.state.packs ? (<Segment>
       <Dimmer active inverted>
         <Loader size='small'>Loading</Loader>
       </Dimmer><br /><br /><br /><br />
     </Segment>) :  (this.state.packs.map((pack, idx) => {
+      if (pack.Users_Packs.confirmed === "TRUE") {
             return (
                 <Accordion key={idx}>
                     <Accordion.Title>
@@ -289,7 +297,6 @@ export default class PacksCard extends React.Component {
                             )
                           }
                         })}
-
                         <Modal open={this.state.challengeModalOpen} onClose={this.handleChallengeClose} closeIcon='close'>
                         <Header icon='users' content='Send a challenge' />
                         <Modal.Content>
@@ -298,7 +305,7 @@ export default class PacksCard extends React.Component {
                             <input className="modalInput" onChange={(e) => this.handleChallengeText(e)} />
                             
                         <Modal.Actions>
-                        <Button type='reset' color='pink' onClick={this.handleChallengeClose} >
+                        <Button type='reset' onClick={this.handleChallengeClose} >
                             <Icon name='remove' /> Cancel
                         </Button>
                         <Button type='submit' color='teal' >
@@ -313,7 +320,7 @@ export default class PacksCard extends React.Component {
                         </p>
                     </Accordion.Content>
                 </Accordion>
-            )
+            )}
         }))}
         </Card.Content>
     </Card>

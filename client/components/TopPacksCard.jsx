@@ -15,7 +15,7 @@ class TopPacksCard extends React.Component {
     super();
     this.state = {
       userdata: '',
-      packs: '',
+      packs: null,
       topPacks: [1,2,3]
     }
   }
@@ -73,17 +73,20 @@ class TopPacksCard extends React.Component {
     var h = Math.floor(d / 3600);
     var m = Math.floor(d % 3600 / 60);
     var s = Math.floor(d % 3600 % 60);
-    s < 10 ? s = '0'+s : null
+    s < 10 ? s = '0'+s : null;
+    m < 10 && h > 0 ? m = '0'+m : null;
     var hDisplay = h > 0 ? h + ':' : "";
-    return hDisplay + m + ':' + s; 
+    return hDisplay + m + ':' + s;
   }
 
   getPackNames(topPacks) {
     var leaders = [];
     for (var i = 0; i < topPacks.length; i++) {
-      for (var j = 0; j < this.state.packs.length; j++) {
-        if (topPacks[i].PackId == this.state.packs[j].id) {
-          leaders.push({name: this.state.packs[j].name, avgTime: topPacks[i].avgThreeMile})
+      if (this.state.packs) {
+        for (var j = 0; j < this.state.packs.length; j++) {
+          if (topPacks[i].PackId == this.state.packs[j].id) {
+            leaders.push({name: this.state.packs[j].name, avgTime: topPacks[i].avgThreeMile})
+          }
         }
       }
     }
@@ -104,7 +107,7 @@ class TopPacksCard extends React.Component {
           </Card.Content>
 
           <Card.Content>
-            {this.props.userdata.loading === true ? (<Segment>
+            {this.state.packs === null ? (<Segment>
               <Dimmer active inverted>
                 <Loader size="small">Loading</Loader>
               </Dimmer><br /><br /><br /><br />

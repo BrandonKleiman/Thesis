@@ -18,7 +18,9 @@ export default class Profile extends React.Component {
   
   componentWillMount() {
     if (!!localStorage.getItem("profile")) {
-      this.props.dispatch(UserActions.signIn());
+      if (!this.props.userdata.DBID) {
+        this.props.dispatch(UserActions.signIn());
+      }
     }
   }
 
@@ -30,7 +32,7 @@ export default class Profile extends React.Component {
       return (
         <div id="profileContent">
         <img className="yellowCircle" src="assets/circle.png"/>
-        <img className="pageBG" src="assets/blue.png"/>
+        <div className="pageBG blueBG"> </div>
         <div className="pageCont">
           <StatsCard stats={this.props.userdata}/>  
           <PacksCard /> 

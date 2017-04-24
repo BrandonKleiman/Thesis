@@ -14,7 +14,7 @@ class TopSoloCard extends React.Component {
   constructor(props) {
     super();
     this.state = {
-      userdata: '',
+      userdata: null,
       topSolo: null
     }
   }
@@ -29,13 +29,13 @@ class TopSoloCard extends React.Component {
       })
   }
 
-
   convertSeconds (d) {
     d = Number(d);
     var h = Math.floor(d / 3600);
     var m = Math.floor(d % 3600 / 60);
     var s = Math.floor(d % 3600 % 60);
     s < 10 ? s = '0'+s : null
+    m < 10 && h > 0 ? m = '0'+m : null;
     var hDisplay = h > 0 ? h + ':' : "";
     return hDisplay + m + ':' + s; 
   }
@@ -54,7 +54,7 @@ class TopSoloCard extends React.Component {
           </Card.Content>
 
           <Card.Content>
-            {this.props.userdata.loading === true ? (<Segment>
+            {this.state.topSolo === null ? (<Segment>
               <Dimmer active inverted>
                 <Loader size="small">Loading</Loader>
               </Dimmer><br /><br /><br /><br />

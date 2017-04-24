@@ -14,14 +14,11 @@ import TopSoloCard from '../components/TopSoloCard';
 export default class Leaderboard extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-
-    };
   }
 
   componentWillMount() {
     if (!!localStorage.getItem("profile")) {
-      this.props.dispatch(UserActions.signIn());
+      // this.props.dispatch(UserActions.signIn());
     }
   }
 
@@ -29,7 +26,7 @@ export default class Leaderboard extends React.Component {
     return (
       <div className="pageCont">
       <img className="yellowCircle" src="assets/circle.png"/>
-      <img className="pageBG" src="assets/teal.png"/>
+      <div className="pageBG tealBG" ></div>
       <TopPacksCard />
       <TopSoloCard />
       </div>

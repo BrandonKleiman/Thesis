@@ -48,6 +48,7 @@ export default class Login extends React.Component {
     var dl = document.querySelector("#dl");
     var manage = document.querySelector("#manage");
     var view = document.querySelector("#viewStats");
+    var welcome = document.querySelector("#welcome");
 
     function scrollLoop(e){
       var scroll = window.pageYOffset;
@@ -55,6 +56,7 @@ export default class Login extends React.Component {
       setTranslate(0, scroll * .08, dl);
       setTranslate(0, scroll * .08, view);
       setTranslate(0, scroll * .06, manage);
+      setTranslate(0, scroll * .15, welcome);
       setTranslate(0, scroll * -.1, tealSq);
       setTranslate(0, scroll * -.2, yellowSq);
       setTranslate(0, scroll * -.1, blueSq);
@@ -120,11 +122,10 @@ export default class Login extends React.Component {
       var that = this
       var blinky = function () { return that.setState({ blinkOpacity: 1, eyeOpacity: 0}); };
       var eyes = function () { return that.setState({ blinkOpacity: 0, eyeOpacity: 1}); };
-      setTimeout(eyes, 200);
-      setTimeout(blinky, 1250);
-      setTimeout(eyes, 1400);
-      setTimeout(blinky, 1800);
-      setTimeout(eyes, 1950)
+      setTimeout(blinky, 900);
+      setTimeout(eyes, 1025);
+      setTimeout(blinky, 1460);
+      setTimeout(eyes, 1578);
     };
 
   render() {
@@ -137,7 +138,7 @@ export default class Login extends React.Component {
         <Button className="topLogin" color='teal' onClick={() => {AuthService.login(); }}>Login</Button>
 
         <div className="bgr" id="tealSq" style={{marginTop: -15}}> 
-        <img src="assets/teal.png" className="childEl sq"/>
+        <div className="childEl sq tealBG"></div>
         <div className="childEl">
           <h2 id="welcome">Welcome to Rabbit!</h2> 
           <div id="rabbit">
@@ -173,7 +174,7 @@ export default class Login extends React.Component {
         </div>
 
         <div className="bgr" id="yellowSq" style={{marginTop: -12}}> 
-        <img src="assets/yellow.png" className="childEl sq"/>
+        <div className="childEl sq yellowBG"> </div>
         <div className="childEl" style={{width: '90vw'}}>
           <img src="assets/appDemo.gif" id="appDemo"></img>
           <h2 id="dl"> Download running <br/>companion<br/></h2>
@@ -186,10 +187,10 @@ export default class Login extends React.Component {
         </div>
 
         <div className="bgr" id="blueSq" style={{marginTop: -160}}> 
-        <img src="assets/blue.png" className="childEl sq"/>
+        <div className="childEl sq blueBG"> </div>
         <div className="childEl" style={{width: '100vw'}}>
         <h2 id="manage">Manage profile on web app</h2>
-          <img style={{marginLeft: '5vw', marginTop: 80, maxHeight: 450, float: 'left'}} src='assets/profilePage.gif' />
+          <img id="profDemo" src='assets/profilePage.gif' />
           <h3 className="profDescr first"> Create packs with your friends <br/></h3>
           <h3 className="profDescr"> Challenge packmates <br/> and create goals <br/></h3>
           <h3 className="profDescr"> Earn badges <br/></h3>
@@ -198,10 +199,10 @@ export default class Login extends React.Component {
         </div>
 
         <div className="bgr" id="salmonSq" style={{marginTop: 130}}> 
-        <img src="assets/sy.png" className="childEl sq"/>
+        <div className="childEl sq salmonBG"> </div>
         <div className="childEl" style={{width: '100vw'}}>
           <h2 id="viewStats"> View running statistics<br/><br/></h2>
-          <img src="assets/analyticsPage.gif" style={{marginRight: '5vw', marginTop: 72, maxHeight: 450, float: 'right'}}></img>
+          <img src="assets/analyticsPage.png" id="statsDemo"></img>
 
           <br/>
           <h3 className="statsDescr first"> Track progress <br/>and running habits<br/></h3>
